@@ -1,0 +1,13 @@
+{
+  "name": "coding-buddy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-powered code review assistant — paste code, get 3 improvements and 1 positive note",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
