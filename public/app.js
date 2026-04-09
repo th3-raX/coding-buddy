@@ -3,7 +3,7 @@
    CodeMirror 6 editor, API interaction, results rendering, history
    ═══════════════════════════════════════════════════════════════════════════ */
 
-console.log("App.js module started loading!");
+
 // ── CodeMirror ESM Imports ────────────────────────────────────────────────
 import { basicSetup } from "codemirror";
 import { Compartment } from "@codemirror/state";
@@ -113,6 +113,10 @@ function initEditor() {
     ],
     parent: editorContainer,
   });
+
+  // Remove the loading placeholder once the editor is mounted
+  const placeholder = document.getElementById("editor-placeholder");
+  if (placeholder) placeholder.remove();
 
   updateLineCount();
 }
@@ -268,10 +272,16 @@ function renderResults(review, language) {
     resultsCards.appendChild(card);
   });
 
-  // Trigger Prism highlighting on new code blocks
-  if (window.Prism) {
-    window.Prism.highlightAllUnder(resultsCards);
-  }
+  // Trigger Prism highlighting — defer until scripts are loaded (they use `defer`)
+  const tryHighlight = () => {
+    if (window.Prism) {
+      window.Prism.highlightAllUnder(resultsCards);
+    } else {
+      // Prism not yet loaded (still being deferred), retry shortly
+      setTimeout(tryHighlight, 100);
+    }
+  };
+  tryHighlight();
 }
 
 function createCard(type, data) {
@@ -592,4 +602,13 @@ function applyTheme(isLight, animate) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 initTheme();
-initEditor();
+
+// Defer CodeMirror initialisation until the browser is idle so the initial
+// paint (header, editor shell, skeleton) completes first, reducing TBT and
+// improving Speed Index.
+if (typeof requestIdleCallback === "function") {
+  requestIdleCallback(initEditor, { timeout: 1500 });
+} else {
+  // Safari / older browsers fallback
+  setTimeout(initEditor, 0);
+}

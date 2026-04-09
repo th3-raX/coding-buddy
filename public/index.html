@@ -9,6 +9,8 @@
     content="Get instant AI-powered code reviews. Paste your code and receive 3 actionable improvements plus a positive note." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2" />
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
@@ -97,7 +99,15 @@
           <span class="line-count" id="line-count">0 lines</span>
         </div>
       </div>
-      <div class="editor-container" id="editor-container"></div>
+      <div class="editor-container" id="editor-container">
+        <div class="editor-placeholder" id="editor-placeholder" aria-hidden="true">
+          <div class="editor-placeholder-line" style="width:55%"></div>
+          <div class="editor-placeholder-line" style="width:75%"></div>
+          <div class="editor-placeholder-line" style="width:40%"></div>
+          <div class="editor-placeholder-line" style="width:65%"></div>
+          <div class="editor-placeholder-line" style="width:30%"></div>
+        </div>
+      </div>
       <div class="editor-footer">
         <span class="editor-hint">Paste up to 200 lines of code</span>
         <button class="btn-review" id="review-btn" disabled>
@@ -187,11 +197,11 @@
   <div class="sidebar-overlay hidden" id="sidebar-overlay"></div>
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-jsx.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-jsx.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 

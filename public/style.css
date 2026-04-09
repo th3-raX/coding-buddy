@@ -375,6 +375,29 @@ body::before {
   overflow: auto;
 }
 
+/* Editor loading skeleton — visible until CodeMirror mounts */
+.editor-placeholder {
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 240px;
+  justify-content: center;
+}
+
+.editor-placeholder-line {
+  height: 13px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--surface-hover) 25%,
+    var(--surface-border) 50%,
+    var(--surface-hover) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
 /* CodeMirror theme overrides */
 .editor-container .cm-editor {
   background: transparent !important;
