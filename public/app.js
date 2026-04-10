@@ -18,7 +18,6 @@ import { oneDark } from "@codemirror/theme-one-dark";
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const MAX_LINES = 200;
-const COOLDOWN_MS = 5000;
 const HISTORY_KEY = "code-review-history";
 const MAX_HISTORY = 20;
 const API_URL = "/api/review";
@@ -51,7 +50,6 @@ let editor = null;
 let languageCompartment = new Compartment();
 let themeCompartment = new Compartment();
 let isReviewing = false;
-let cooldownTimeout = null;
 let currentReview = null;
 
 // ── DOM Elements ──────────────────────────────────────────────────────────
@@ -74,6 +72,7 @@ const historySidebar = $("history-sidebar");
 const historyList = $("history-list");
 const sidebarOverlay = $("sidebar-overlay");
 const clearHistoryBtn = $("clear-history-btn");
+const clearBtn = $("clear-btn");
 const toastContainer = $("toast-container");
 
 window.addEventListener("error", (e) => {
@@ -102,8 +101,13 @@ function initEditor() {
       ),
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
+          // If user edits code while in reset mode, revert to "Review Code"
+          if (reviewBtn.dataset.mode === "reset") {
+            exitResetMode();
+          }
           updateLineCount();
           updateReviewButton();
+          updateClearButton();
         }
       }),
       EditorView.theme({
@@ -143,10 +147,32 @@ function updateLineCount() {
 }
 
 function updateReviewButton() {
+  // Don't override when in reset mode — the button stays enabled
+  if (reviewBtn.dataset.mode === "reset") return;
   const code = getEditorContent().trim();
   const count = getLineCount();
   reviewBtn.disabled = !code || count > MAX_LINES || isReviewing;
 }
+
+function updateClearButton() {
+  clearBtn.disabled = getEditorContent().trim() === "" || isReviewing;
+}
+
+function clearEditor() {
+  if (reviewBtn.dataset.mode === "reset") {
+    exitResetMode();
+  }
+  setEditorContent("");
+  hideResults();
+  hideError();
+  currentReview = null;
+  updateReviewButton();
+  updateClearButton();
+  updateLineCount();
+  editor?.focus();
+}
+
+clearBtn.addEventListener("click", clearEditor);
 
 // Language switching
 languageSelect.addEventListener("change", () => {
@@ -212,34 +238,59 @@ async function submitReview() {
     saveToHistory(currentReview);
     hideLoading();
     showResults();
+    isReviewing = false;
+    reviewBtn.classList.remove("loading");
+    enterResetMode();
   } catch (err) {
     hideLoading();
     showError(err.message || "Something went wrong. Please try again.");
-  } finally {
     isReviewing = false;
     reviewBtn.classList.remove("loading");
-    startCooldown();
+    updateReviewButton();
   }
 }
 
-function startCooldown() {
-  let remaining = COOLDOWN_MS / 1000;
-  reviewBtn.disabled = true;
-  reviewBtnText.textContent = `Wait ${remaining}s`;
 
-  cooldownTimeout = setInterval(() => {
-    remaining--;
-    if (remaining <= 0) {
-      clearInterval(cooldownTimeout);
-      reviewBtnText.textContent = "Review Code";
-      updateReviewButton();
-    } else {
-      reviewBtnText.textContent = `Wait ${remaining}s`;
-    }
-  }, 1000);
+// ── New Review / Reset ─────────────────────────────────────────────────────
+
+const REVIEW_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>`;
+const RESET_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>`;
+
+function enterResetMode() {
+  reviewBtn.dataset.mode = "reset";
+  reviewBtn.disabled = false;
+  reviewBtn.classList.add("reset-mode");
+  reviewBtn.querySelector("svg").outerHTML = RESET_ICON;
+  reviewBtnText.textContent = "New Review";
 }
 
-reviewBtn.addEventListener("click", submitReview);
+function exitResetMode() {
+  delete reviewBtn.dataset.mode;
+  reviewBtn.classList.remove("reset-mode");
+  reviewBtn.querySelector("svg").outerHTML = REVIEW_ICON;
+  reviewBtnText.textContent = "Review Code";
+}
+
+function resetReview() {
+  setEditorContent("");
+  hideResults();
+  hideError();
+  currentReview = null;
+  exitResetMode();
+  updateReviewButton();
+  updateLineCount();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  // Focus editor after scroll completes
+  setTimeout(() => editor?.focus(), 300);
+}
+
+reviewBtn.addEventListener("click", () => {
+  if (reviewBtn.dataset.mode === "reset") {
+    resetReview();
+  } else {
+    submitReview();
+  }
+});
 
 // ═══════════════════════════════════════════════════════════════════════════
 // RESULTS RENDERING
@@ -447,6 +498,7 @@ function loadHistoryItem(id) {
   renderResults(item.review, item.language);
   hideError();
   showResults();
+  enterResetMode();
   closeSidebar();
 }
 
