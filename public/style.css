@@ -239,10 +239,22 @@ body::before {
   animation: pulse-glow 3s ease-in-out infinite;
 }
 
+.header-title-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .header-title {
   font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.header-subtitle {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-secondary);
 }
 
 .header-right {
@@ -547,7 +559,9 @@ body::before {
 }
 
 @keyframes btn-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* New Review (reset) mode — ghost/outline style */
@@ -1163,6 +1177,9 @@ body::before {
   }
   .header-title {
     font-size: 0.95rem;
+  }
+  .header-subtitle {
+    font-size: 0.75rem;
   }
   .code-comparison {
     grid-template-columns: 1fr;

@@ -3,7 +3,6 @@
    CodeMirror 6 editor, API interaction, results rendering, history
    ═══════════════════════════════════════════════════════════════════════════ */
 
-
 // ── CodeMirror ESM Imports ────────────────────────────────────────────────
 import { basicSetup } from "codemirror";
 import { Compartment } from "@codemirror/state";
@@ -245,11 +244,11 @@ async function submitReview() {
     hideLoading();
     showError(err.message || "Something went wrong. Please try again.");
     isReviewing = false;
+    reviewBtnText.textContent = "Try Again";
     reviewBtn.classList.remove("loading");
     updateReviewButton();
   }
 }
-
 
 // ── New Review / Reset ─────────────────────────────────────────────────────
 
